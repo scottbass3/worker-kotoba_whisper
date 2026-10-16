@@ -99,4 +99,5 @@ def run_whisper_job(job):
     return whisper_results
 
 
-runpod.serverless.start({"handler": run_whisper_job})
+if __name__ == "__main__":
+    runpod.serverless.start({"handler": run_whisper_job})
