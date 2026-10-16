@@ -124,6 +124,14 @@ card. The image itself is far larger than the weights: the CUDA base is around
 pinning the RTX 4090 that upstream needed for `large-v3` and `turbo`. Wider
 pools mean far less chance of hitting a supply constraint at deploy time.
 
+Two Blackwell MIG cards are subtracted by name. Pool membership does not
+follow the pool's name: `NVIDIA RTX PRO 6000 Blackwell Server Edition MIG
+1g.24gb` belongs to `AMPERE_24` and its 48 GB sibling belongs to
+`ADA_48_PRO`. Workers placed on them sat in `INITIALIZING` and never produced
+a single log line, and ctranslate2 4.8.3 has no verified `sm_120` support, so
+both are excluded explicitly. Check pool membership with `list-gpu-types`
+rather than inferring it from the pool name.
+
 `allowedCudaVersions` starts at 12.3 because the image is built on
 `nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04`; the host driver has to be at
 least that new. It has no upper bound: a CUDA 12.3 container runs fine on a
