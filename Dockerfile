@@ -47,8 +47,11 @@ RUN python /fetch_models.py && \
 # Copy handler and other code
 COPY src .
 
+# Runpod Hub entrypoint; src/ is already flattened into / above
+COPY handler.py .
+
 # test input that will be used when the container runs outside of runpod
 COPY test_input.json .
 
 # Set default command
-CMD python -u /rp_handler.py
+CMD python -u /handler.py
