@@ -9,6 +9,13 @@ rp_debugger:
 - Utility that provides additional debugging information.
 The handler must be called with --rp_debugger flag to enable it.
 """
+import time
+
+# Boot markers, printed before and after the heavy imports. The Hub test was
+# canceled ~5 s after the container started with no Python output at all;
+# these lines show in the test log how far the worker got before that.
+print(f"[boot {time.strftime('%H:%M:%S')}] handler module started", flush=True)
+
 import base64
 import tempfile
 
@@ -18,9 +25,12 @@ from runpod.serverless.utils.rp_validator import validate
 import runpod
 import predict
 
+print(f"[boot {time.strftime('%H:%M:%S')}] imports done", flush=True)
 
 MODEL = predict.Predictor()
 MODEL.setup()
+
+print(f"[boot {time.strftime('%H:%M:%S')}] model ready, starting the serverless worker", flush=True)
 
 
 def base64_to_tempfile(base64_file: str) -> str:

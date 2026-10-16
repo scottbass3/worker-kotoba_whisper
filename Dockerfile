@@ -7,7 +7,8 @@ RUN rm -f /etc/apt/sources.list.d/*.list
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /
 
