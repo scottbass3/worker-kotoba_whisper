@@ -5,37 +5,30 @@ FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
 # Remove any third-party apt sources to avoid issues with expiring keys.
 RUN rm -f /etc/apt/sources.list.d/*.list
 
-# Set shell and noninteractive environment variables
-SHELL ["/bin/bash", "-c"]
-ENV DEBIAN_FRONTEND=noninteractive
-ENV SHELL=/bin/bash
+ENV DEBIAN_FRONTEND=noninteractive \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONUNBUFFERED=1
 
-# Set working directory
 WORKDIR /
 
-# Update and upgrade the system packages
+# Only what the worker needs at runtime. Every image byte is paid on each cold
+# start, when a worker pulls the image, so nothing here is "just in case":
+# - no compiler or Python headers: every dependency installs from a wheel;
+# - no ffmpeg: faster-whisper decodes audio with PyAV, which bundles its own;
+# - no `apt-get upgrade`: it adds a large layer and makes the build depend on
+#   the day it runs.
+# ca-certificates is needed for HTTPS: the weights at build time, `audio` URLs
+# at runtime.
 RUN apt-get update -y && \
-    apt-get upgrade -y && \
-    apt-get install --yes --no-install-recommends sudo ca-certificates git wget curl bash libgl1 libx11-6 software-properties-common ffmpeg build-essential -y &&\
-    apt-get autoremove -y && \
-    apt-get clean -y && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Python 3.10
-RUN apt-get update -y && \
-    apt-get install python3.10 python3.10-dev python3.10-venv python3-pip -y --no-install-recommends && \
-    ln -s /usr/bin/python3.10 /usr/bin/python && \
-    rm -f /usr/bin/python3 && \
-    ln -s /usr/bin/python3.10 /usr/bin/python3 && \
-    apt-get autoremove -y && \
-    apt-get clean -y && \
+    apt-get install -y --no-install-recommends python3.10 python3-pip ca-certificates && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY builder/requirements.txt /requirements.txt
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
-    pip install -r /requirements.txt --no-cache-dir
+RUN python -m pip install -r /requirements.txt && \
+    rm /requirements.txt
 
 # Bake the kotoba-whisper weights into the image so cold starts need no network
 ENV MODEL_PATH=/models/kotoba-whisper-v2.0-faster
@@ -51,4 +44,4 @@ COPY handler.py predict.py rp_schema.py model_config.py ./
 COPY test_input.json .
 
 # Set default command
-CMD python -u /handler.py
+CMD ["python", "-u", "/handler.py"]
