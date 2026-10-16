@@ -40,15 +40,12 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Bake the kotoba-whisper weights into the image so cold starts need no network
 ENV MODEL_PATH=/models/kotoba-whisper-v2.0-faster
 COPY builder/fetch_models.py /fetch_models.py
-COPY src/model_config.py /model_config.py
+COPY model_config.py /model_config.py
 RUN python /fetch_models.py && \
     rm /fetch_models.py /model_config.py
 
-# Copy handler and other code
-COPY src .
-
-# Runpod Hub entrypoint; src/ is already flattened into / above
-COPY handler.py .
+# Handler and its modules, all from the repository root
+COPY handler.py predict.py rp_schema.py model_config.py ./
 
 # test input that will be used when the container runs outside of runpod
 COPY test_input.json .

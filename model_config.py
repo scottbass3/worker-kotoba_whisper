@@ -2,7 +2,7 @@
 Single source of truth for the model this worker serves.
 
 Imported both at build time (builder/fetch_models.py) and at runtime
-(src/predict.py), so the baked weights and the loaded weights can never drift.
+(predict.py), so the baked weights and the loaded weights can never drift.
 """
 
 import os

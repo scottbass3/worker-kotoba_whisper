@@ -28,7 +28,7 @@ narrowed to a single model.
 
 kotoba-whisper-v2.0 is distilled from Whisper large-v3 on Japanese speech only.
 Decoding it in any other language produces unreliable output, so `language` is
-pinned to `ja` in `src/model_config.py` and the request cannot override it.
+pinned to `ja` in `model_config.py` and the request cannot override it.
 
 ### Why translation was removed
 
@@ -165,7 +165,7 @@ cold start.
 docker build -t kotoba-whisper-worker .
 ```
 
-To run the handler outside the container, `src/predict.py` falls back to pulling
+To run the handler outside the container, `predict.py` falls back to pulling
 the model from the Hugging Face Hub when `MODEL_PATH` does not exist:
 
 ```bash
@@ -175,22 +175,22 @@ python handler.py --test_input="$(cat test_input.json)"
 
 ### Entrypoint layout
 
-Two Runpod systems inspect the root `handler.py`, and they check different
-things:
+Every Python module lives in the repository root, next to `handler.py`:
 
-- The **Hub** requires the file to exist in the repository root or `.runpod/`.
-- The **GitHub integration** scans the file's source for a
-  `runpod.serverless.start()` call. An import that reaches the call indirectly
-  is not enough; deploying that way fails with "missing
-  `runpod.serverless.start()`".
+```
+handler.py        entrypoint; run_whisper_job + runpod.serverless.start()
+predict.py        Predictor, model loading, transcription, output formats
+rp_schema.py      input validation schema
+model_config.py   the one place the model id and language are defined
+```
 
-So the call lives in `handler.py` itself. The worker's implementation stays in
-`src/`: `handler.py` puts `src/` on `sys.path` when run from a checkout, and
-does nothing inside the image, where the Dockerfile has already flattened
-`src/` into `/`. Either way it imports `run_whisper_job` and starts the worker.
-The container `CMD` runs this same file, so the entrypoint both systems
-validate is the one that actually runs.
+This deliberately mirrors
+[runpod-workers/worker-basic](https://github.com/runpod-workers/worker-basic),
+the layout Runpod's docs point to. Two Runpod systems inspect this file and
+they check different things: the **Hub** requires `handler.py` to exist in the
+root or `.runpod/`, while the **GitHub integration** validates that it contains
+a `runpod.serverless.start()` call.
 
-`src/rp_handler.py` keeps its own `runpod.serverless.start()` behind an
-`if __name__ == "__main__"` guard, so running it directly still works and
-importing it does not start a second worker.
+An earlier layout kept the implementation in `src/` with a root `handler.py`
+that imported it. The Hub accepted that, but the GitHub integration rejected it
+with "missing `runpod.serverless.start()`", so the indirection is gone.
