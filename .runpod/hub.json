@@ -6,7 +6,7 @@
   "iconUrl": "https://dummyimage.com/100x100/bc002d/fff&text=KW",
   "config": {
     "runsOn": "GPU",
-    "containerDiskInGb": 10,
+    "containerDiskInGb": 20,
     "gpuIds": "AMPERE_16,AMPERE_24,ADA_24,AMPERE_48,ADA_48_PRO",
     "gpuCount": 1,
     "allowedCudaVersions": [
