@@ -134,6 +134,24 @@ swing between HIGH and NONE.
 
 ---
 
+## The Hub smoke test
+
+`.runpod/tests.json` embeds six seconds of Japanese speech as `audio_base64`
+rather than pointing at a URL, and decodes it with `beam_size` and `best_of`
+of 1. Measured in the real image, that runs in about 10 seconds including
+model load, against 73 seconds for the full 207-second sample over HTTP.
+
+The point is that the Hub test should prove the worker answers, not that it
+transcribes well. Embedding the audio also removes a network fetch from inside
+the test pod, which is the likeliest reason earlier builds failed with
+`basic_test test timed out: context canceled` even though the same job
+finishes in well under the timeout locally.
+
+`test_input.json` in the repository root still uses the full sample over a
+URL; that one is a usage example, not a smoke test.
+
+---
+
 ## Dependency pins
 
 `builder/requirements.txt` pins two transitive dependencies. Both were breaking
