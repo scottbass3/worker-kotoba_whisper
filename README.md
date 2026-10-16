@@ -1,5 +1,7 @@
 # Kotoba Whisper Worker
 
+[![Runpod](https://api.runpod.io/badge/scottbass3/worker-kotoba_whisper)](https://console.runpod.io/hub/listing/scottbass3/worker-kotoba_whisper)
+
 A RunPod serverless worker that transcribes **Japanese** audio using
 [kotoba-whisper-v2.0-faster](https://huggingface.co/kotoba-tech/kotoba-whisper-v2.0-faster),
 a [CTranslate2](https://github.com/OpenNMT/CTranslate2) conversion of
