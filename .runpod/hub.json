@@ -7,7 +7,7 @@
   "config": {
     "runsOn": "GPU",
     "containerDiskInGb": 20,
-    "gpuIds": "AMPERE_16,AMPERE_24,ADA_24,AMPERE_48,ADA_48_PRO",
+    "gpuIds": "AMPERE_16,AMPERE_24,ADA_24,AMPERE_48,ADA_48_PRO,-NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 1g.24gb,-NVIDIA RTX PRO 6000 Blackwell Server Edition MIG 2g.48gb",
     "gpuCount": 1,
     "allowedCudaVersions": [
       "13.2",
