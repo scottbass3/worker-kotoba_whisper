@@ -114,6 +114,20 @@ detection result. It is kept so existing clients do not break.
 
 ---
 
+## Hardware
+
+The weights are 1.41 GB in FP16, so the worker is comfortable on any 16 GB
+card. `.runpod/hub.json` therefore offers the Ampere and Ada pools
+(`AMPERE_16`, `AMPERE_24`, `ADA_24`, `AMPERE_48`, `ADA_48_PRO`) rather than
+pinning the RTX 4090 that upstream needed for `large-v3` and `turbo`. Wider
+pools mean far less chance of hitting a supply constraint at deploy time.
+
+`allowedCudaVersions` starts at 12.3 because the image is built on
+`nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04`; the host driver has to be at
+least that new.
+
+---
+
 ## Dependency pins
 
 `builder/requirements.txt` pins two transitive dependencies. Both were breaking
