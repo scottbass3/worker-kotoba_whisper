@@ -171,10 +171,22 @@ python handler.py --test_input="$(cat test_input.json)"
 
 ### Entrypoint layout
 
-The Runpod Hub requires a `handler.py` in the repository root (or in
-`.runpod/`), but this worker keeps its implementation in `src/`. Root
-`handler.py` bridges the two: it puts `src/` on `sys.path` when run from a
-checkout, and does nothing inside the image, where the Dockerfile has already
-flattened `src/` into `/`. Either way it imports `rp_handler`, which starts the
-serverless worker. The container `CMD` runs this same file, so the entrypoint
-the Hub validates is the one that actually runs.
+Two Runpod systems inspect the root `handler.py`, and they check different
+things:
+
+- The **Hub** requires the file to exist in the repository root or `.runpod/`.
+- The **GitHub integration** scans the file's source for a
+  `runpod.serverless.start()` call. An import that reaches the call indirectly
+  is not enough; deploying that way fails with "missing
+  `runpod.serverless.start()`".
+
+So the call lives in `handler.py` itself. The worker's implementation stays in
+`src/`: `handler.py` puts `src/` on `sys.path` when run from a checkout, and
+does nothing inside the image, where the Dockerfile has already flattened
+`src/` into `/`. Either way it imports `run_whisper_job` and starts the worker.
+The container `CMD` runs this same file, so the entrypoint both systems
+validate is the one that actually runs.
+
+`src/rp_handler.py` keeps its own `runpod.serverless.start()` behind an
+`if __name__ == "__main__"` guard, so running it directly still works and
+importing it does not start a second worker.
