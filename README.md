@@ -124,7 +124,11 @@ pools mean far less chance of hitting a supply constraint at deploy time.
 
 `allowedCudaVersions` starts at 12.3 because the image is built on
 `nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04`; the host driver has to be at
-least that new.
+least that new. It has no upper bound: a CUDA 12.3 container runs fine on a
+newer host driver, and most of Runpod's fleet now reports CUDA 13.0 or 13.2, so
+capping the list at 12.8 discarded most available capacity. Check live stock
+with the `get-capacity` tool before pinning a GPU; the Ampere workstation cards
+swing between HIGH and NONE.
 
 ---
 
