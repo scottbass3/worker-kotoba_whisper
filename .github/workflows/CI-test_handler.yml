@@ -66,13 +66,13 @@ jobs:
         env:
           MODEL_PATH: /models/kotoba-whisper-v2.0-faster
         run: |
-          PYTHONPATH=src python builder/fetch_models.py
+          PYTHONPATH=. python builder/fetch_models.py
 
       - name: Execute Tests
         env:
           MODEL_PATH: /models/kotoba-whisper-v2.0-faster
         run: |
-          python src/rp_handler.py --test_input='{"input": {"audio": "https://huggingface.co/kotoba-tech/kotoba-whisper-v1.0-ggml/resolve/main/sample_ja_speech.wav"}}'
+          python handler.py --test_input='{"input": {"audio": "https://huggingface.co/kotoba-tech/kotoba-whisper-v1.0-ggml/resolve/main/sample_ja_speech.wav"}}'
 
   terminate_worker:
     if: ${{ always() && !success() }}
