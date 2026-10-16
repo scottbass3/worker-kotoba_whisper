@@ -150,5 +150,15 @@ the model from the Hugging Face Hub when `MODEL_PATH` does not exist:
 
 ```bash
 pip install -r builder/requirements.txt
-python src/rp_handler.py --test_input="$(cat test_input.json)"
+python handler.py --test_input="$(cat test_input.json)"
 ```
+
+### Entrypoint layout
+
+The Runpod Hub requires a `handler.py` in the repository root (or in
+`.runpod/`), but this worker keeps its implementation in `src/`. Root
+`handler.py` bridges the two: it puts `src/` on `sys.path` when run from a
+checkout, and does nothing inside the image, where the Dockerfile has already
+flattened `src/` into `/`. Either way it imports `rp_handler`, which starts the
+serverless worker. The container `CMD` runs this same file, so the entrypoint
+the Hub validates is the one that actually runs.
